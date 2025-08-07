@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import GameDashboard from './GameDashboard.js';
 
-
-// Komponenta pro hodiny a datum
+// Komponenta Clock – hodiny a datum
 function Clock() {
   const [now, setNow] = React.useState(new Date());
 
@@ -17,19 +16,19 @@ function Clock() {
 
   return (
     <div style={{ 
-      position: 'absolute',        // absolutní pozicování
-      top: 10,                    // odsazení od vrchu
-      right: 22,                  // odsazení od pravého okraje
+      position: 'absolute',
+      top: 10,
+      right: 22,
       color: 'white', 
       fontSize: '1.7rem', 
       textAlign: 'right',
-      backgroundColor: 'rgba(0, 0, 0, 0.3)', // lehká průhledná černá pro lepší čitelnost
+      backgroundColor: 'rgba(0, 0, 0, 0.3)',
       padding: '0.5rem 1rem',
       borderRadius: '8px',
       userSelect: 'none',
       fontWeight: 'bold',
       minWidth: 120,
-      zIndex: 10,                 // nad obrázkem
+      zIndex: 10,
     }}>
       <div>{day}, {date}</div>
       <div style={{ fontSize: '2rem' }}>{time}</div>
@@ -37,7 +36,7 @@ function Clock() {
   );
 }
 
-// Komponenta jednoho odkazu s favicon z Google favicon service
+// Komponenta jednoho odkazu s favicon
 function LinkItem({ url, title }) {
   const domain = (() => {
     try {
@@ -116,12 +115,8 @@ function LinkItem({ url, title }) {
   );
 }
 
-// Komponenta pro kategorii odkazů s rozbalovacím menu a vizuálními prvky
-function CategorySection({ title, links }) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const toggleOpen = () => setIsOpen(prev => !prev);
-
+// Komponenta kategorie s rozbalováním
+function CategorySection({ title, links, isOpen, onToggle }) {
   return (
     <section style={{ 
       padding: '1rem', 
@@ -133,7 +128,7 @@ function CategorySection({ title, links }) {
       userSelect: 'none',
     }}>
       <h2 
-        onClick={toggleOpen} 
+        onClick={onToggle} 
         style={{ 
           color: '#d9b382',                
           borderBottom: '1px solid #7a4f24', 
@@ -147,11 +142,9 @@ function CategorySection({ title, links }) {
           gap: '0.5rem',
           transition: 'margin-bottom 0.3s ease',
         }}
-        aria-expanded={isOpen}
         aria-controls={`${title}-links`}
       >
         {title}
-        {/* Ikona šipky, která se otáčí */}
         <span style={{
           display: 'inline-block',
           transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)',
@@ -165,7 +158,6 @@ function CategorySection({ title, links }) {
         </span>
       </h2>
       
-      {/* Animované kde se odkazy zobrazí / skryjí */}
       <nav
         id={`${title}-links`}
         style={{
@@ -190,12 +182,17 @@ function HeroImage({ src, alt, children }) {
         alt={alt}
         style={{ width: '100%', height: 'auto', objectFit: 'cover' }}
       />
-      {children /* zde se zobrazí třeba hodiny */}
+      {children}
     </div>
   );
 }
 
+// --- Hlavní komponenta App ---
 function App() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [openCategories, setOpenCategories] = useState(new Set());
+  const [savedOpenCategories, setSavedOpenCategories] = useState(new Set());
+
   const linksData = [
     {
       title: "Kancelář",
@@ -306,8 +303,50 @@ function App() {
         { url: "https://www.credly.com/users/pavel-snabl/edit#credly", title: "Creedly" },
         { url: "https://webshare.cz/#/search", title: "Webshare" },
       ],
-    },
+    }
   ];
+
+  // Filtrování dat podle searchTerm
+  const filteredLinksData = searchTerm.trim() === ''
+    ? linksData
+    : linksData
+        .map(cat => ({
+          ...cat,
+          links: cat.links.filter(link => 
+            link.title.toLowerCase().includes(searchTerm.toLowerCase())
+          )
+        }))
+        .filter(cat => cat.links.length > 0);
+
+  // Synchronizace rozbalení kategorií podle searchTerm
+  useEffect(() => {
+    if (searchTerm.trim() === '') {
+      // Vrátit stav otevřených kategorií do původního stavu (uloženého v savedOpenCategories)
+      setOpenCategories(new Set(savedOpenCategories));
+    } else {
+      // Uložíme původní rozbalené kategorie pokud ještě nejsou uloženy
+      if (savedOpenCategories.size === 0) {
+        setSavedOpenCategories(new Set(openCategories));
+      }
+      // Rozbalíme všechny odpovídající kategorie vyhledávání
+      const newOpen = new Set(filteredLinksData.map(cat => cat.title));
+      setOpenCategories(newOpen);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchTerm]);
+
+  // Přepnutí otevření/sbalení kategorie
+  const toggleCategoryOpen = (categoryTitle) => {
+    setOpenCategories(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(categoryTitle)) {
+        newSet.delete(categoryTitle);
+      } else {
+        newSet.add(categoryTitle);
+      }
+      return newSet;
+    });
+  };
 
   return (
     <div style={{ 
@@ -322,6 +361,26 @@ function App() {
       </HeroImage>
 
       <GameDashboard />
+
+      <div style={{ marginTop: '1rem', marginBottom: '1rem', textAlign: 'center' }}>
+        <input
+          type="text"
+          placeholder="Hledat odkazy..."
+          value={searchTerm}
+          onChange={e => setSearchTerm(e.target.value)}
+          style={{
+            width: '100%',
+            maxWidth: 400,
+            padding: '0.5rem 1rem',
+            fontSize: '1.1rem',
+            borderRadius: '8px',
+            border: '1px solid #7a4f24',
+            backgroundColor: '#4b3221',
+            color: '#f3e9d2',
+            outline: 'none',
+          }}
+        />
+      </div>
       
       <main style={{
         display: 'grid',
@@ -330,11 +389,21 @@ function App() {
         marginTop: '1rem',
         width: '100%',
         boxSizing: 'border-box',
-        alignItems: 'start', 
+        alignItems: 'start',
       }}>
-        {linksData.map((cat, idx) => (
-          <CategorySection key={idx} title={cat.title} links={cat.links} />
-        ))}
+        {filteredLinksData.length > 0 ? filteredLinksData.map(cat => (
+          <CategorySection
+            key={cat.title}
+            title={cat.title}
+            links={cat.links}
+            isOpen={openCategories.has(cat.title)}
+            onToggle={() => toggleCategoryOpen(cat.title)}
+          />
+        )) : (
+          <p style={{ gridColumn: '1/-1', textAlign: 'center', color: '#d9b382' }}>
+            Nenašel se žádný odkaz odpovídající hledání.
+          </p>
+        )}
       </main>
     </div>
   );
