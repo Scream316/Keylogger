@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import GameDashboard from './GameDashboard.js';
-
+import WeeklyCalendar from './WeeklyCalendar';
 // Komponenta Clock – hodiny a datum
 function Clock() {
   const [now, setNow] = React.useState(new Date());
@@ -206,6 +206,8 @@ function App() {
         { url: "https://www.brnoid.cz/cs/", title: "BrnoID" },
         { url: "https://pidlitacka.cz/cs/login", title: "Lítačka" },
         { url: "http://mojeid.cz/auction/password/", title: "MojeID" },
+        { url: "http://192.168.31.193:3030/#/timesheet/list", title: "Traggo" },
+        { url: "http://192.168.31.190:8080/", title: "Stirling PDF" },
         { url: "https://www.mojedatovaschranka.cz/as/login?uri=https%3a%2f%2fwww.mojedatovaschranka.cz%2fportal%2fISDS%2f&status=NCOO", title: "Datové schránky" },
       ],
     },
@@ -240,6 +242,7 @@ function App() {
         { url: "https://www.databazeknih.cz/", title: "Databáze knih" },
         { url: "https://katalog.kjm.cz/arl-kjm/cs/index/", title: "Mahenova knihovna" },
         { url: "https://www.trhknih.cz/", title: "Trh knih" },
+        { url: "http://192.168.31.195:5000/login", title: "Kavita" },
       ],
     },
     {
@@ -253,6 +256,8 @@ function App() {
         { url: "https://obcan.portal.gov.cz/prihlaseni", title: "Portál občana" },
         { url: "https://moje.allianz.cz/online-moa/cs/login/auth", title: "Moje Alianz" },
         { url: "http://mojeid.cz/auction/password/", title: "Zdravotní pojišťovna" },
+        { url: "http://192.168.31.194:8093/login", title: "Firefly III" },
+        { url: "http://192.168.31.192:8080/dashboard", title: "Invoice Ninja" },
         { url: "https://docs.google.com/spreadsheets/d/1qAnssfHsxB1HHpp-lnZtq73sGAO6AklBCZHHBW5S7ZI/edit?gid=0#gid=0", title: "Splátka notebook" },
       ],
     },
@@ -265,6 +270,13 @@ function App() {
         { url: "https://www.dekudeals.com/games", title: "Deku Deals" },
         { url: "https://www.smarty.cz/", title: "Smarty" },
         { url: "https://www.alza.cz/", title: "Alza" },
+      ],
+    },
+    {
+      title: "Monitoring",
+      links: [
+        { url: "http://192.168.31.189:3000/?orgId=1&from=now-6h&to=now&timezone=browser", title: "Grafana" },
+        { url: "http://192.168.31.189:3001/dashboard", title: "Uptime Kuma" },
       ],
     },
     {
@@ -362,6 +374,7 @@ function App() {
 
       <GameDashboard />
 
+      <WeeklyCalendar />
       <div style={{ marginTop: '1rem', marginBottom: '1rem', textAlign: 'center' }}>
         <input
           type="text"
