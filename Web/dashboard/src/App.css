@@ -36,3 +36,11 @@
     transform: rotate(360deg);
   }
 }
+.dashboard {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+  padding: 1rem;
+  background-color: #1a1410;
+  min-height: 100vh;
+}
